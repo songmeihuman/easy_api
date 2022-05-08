@@ -1,7 +1,7 @@
 import asyncio
 from typing import List, Dict
 
-from easy_api.handler.schema.group import TaskSchema
+from easy_api.handler.schema.pipeline import TaskSchema
 from easy_api.service import trim_output
 from easy_api.tasks import get_task_by_name
 

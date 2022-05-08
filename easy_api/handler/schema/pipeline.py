@@ -15,6 +15,6 @@ class TaskSchema(JsonSchemaMixin):
 
 
 @dataclass
-class GroupRequestSchema(JsonSchemaMixin):
+class PipelineRequestSchema(JsonSchemaMixin):
     """ The request schema for group """
     tasks: List[TaskSchema]

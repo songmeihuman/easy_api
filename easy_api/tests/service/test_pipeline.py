@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 import pytest
 
-from easy_api.handler.schema.group import TaskSchema
-from easy_api.service.group import wrap_task, run
+from easy_api.handler.schema.pipeline import TaskSchema
+from easy_api.service.pipeline import wrap_task, run
 
 
 def async_echo(v):
@@ -31,7 +31,7 @@ async def test_wrap_task(data, output, expect, message):
     name = "test"
     context = {}
 
-    with patch("easy_api.service.group.get_task_by_name") as mock:
+    with patch("easy_api.service.pipeline.get_task_by_name") as mock:
         mock.return_value = async_echo(data)
         result = await wrap_task(package_name, name, {}, output, context)
         assert result == expect, message
@@ -64,7 +64,7 @@ async def test_wrap_task(data, output, expect, message):
          "task output fan in to next layer task input"),
 ))
 async def test_run(task_configs, data, expect, message):
-    with patch("easy_api.service.group.get_task_by_name") as mock:
+    with patch("easy_api.service.pipeline.get_task_by_name") as mock:
         mock.return_value = async_require_arguments(data)
         result = await run(task_configs)
         assert result == expect, message
@@ -83,7 +83,7 @@ async def test_run(task_configs, data, expect, message):
          "output have invalid syntax"),
 ))
 async def test_run_with_fail(task_configs, data, expect, message):
-    with patch("easy_api.service.group.get_task_by_name") as mock:
+    with patch("easy_api.service.pipeline.get_task_by_name") as mock:
         with pytest.raises(expect):
             mock.return_value = async_require_arguments(data)
             await run(task_configs)
