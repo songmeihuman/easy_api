@@ -1,2 +1,12 @@
+venv:
+	python3 -m venv venv
+
+setup: requirements.txt venv
+	./venv/bin/python -m pip install -r requirements.txt
+
+start: requirements.txt venv
+	./venv/bin/python main.py
+
 worker:
-	python -m celery -A easy_api worker -c 1 -l info
+	./venv/bin/python -m celery -A easy_api worker -l info
+

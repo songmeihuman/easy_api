@@ -3,7 +3,7 @@ import os.path
 from abc import ABC
 
 from {{ package_name }}.handler import api
-from {{ package_name }}.service import {{ sql_name }}_sql
+from {{ package_name }}.service import {{ sql_name }}
 from easy_api.web import Handler, SqlResult, response_schema, request_schema
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -23,7 +23,7 @@ class {{ sql_name.title().replace('_', '') }}Handler(Handler, ABC):
         summary: {{ sql_name }}
         """
         try:
-            result = await {{ sql_name }}_sql.run(input_dict)
+            result = await {{ sql_name }}.run(input_dict)
             return SqlResult.success(result['result'], result['changes'])
         except Exception as e:
             logger.exception("run {{ package_name }}.{{ sql_name }} sql error")
