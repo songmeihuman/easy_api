@@ -1,0 +1,29 @@
+import logging
+from abc import ABC
+
+{% set task_schema_name = legal_task_name + 'Schema' %}
+from {{ package_name }}.handler import api
+from {{ package_name }}.handler.schema.{{ task_name }} import {{ task_schema_name }}
+from {{ package_name }}.service import {{ task_name }}
+from easy_api.web import Handler, Result, response_schema, request_schema
+
+logger = logging.getLogger("{{ package_name }}.{{ task_name }}")
+
+
+@api('/{{ task_name }}')
+class {{ legal_task_name }}Handler(Handler, ABC):
+
+    @response_schema(Result)
+    @request_schema("input_schema", schema={{ task_schema_name }})
+    async def post(self, input_schema: {{ task_schema_name }}) -> Result:
+        """
+        ---
+        tags: [{{ package_name }}]
+        summary: {{ task_name }}
+        """
+        try:
+            result = await {{ task_name }}.run(input_schema.name)
+            return Result.success(result)
+        except Exception as e:
+            logger.exception("run {{ package_name }}.{{ task_name }} task error")
+            return Result.error(e)

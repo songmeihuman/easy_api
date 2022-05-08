@@ -1,0 +1,35 @@
+server:
+  host: "localhost"
+  port: 8000
+  timezone: 'Asia/Shanghai'
+  apps:
+    - easy_api
+    - demo
+
+swagger:
+  enable: true
+  title: "EasyApi"
+  description: "EasyApi is a powerful and easy-to-use API framework for Python"
+  version: "1.0.0"
+  path: "/doc.html"
+  swagger_file_path: ""
+
+database:
+  instances:
+    - name: "default"
+      type: "sqlite"
+      db: "sqlite.db"
+    - name: "mysql-example"
+      type: "mysql"
+      db: "mysql"
+      host: "localhost"
+      port: 3306
+      user: "root"
+      password: "root"
+      charset: "utf8mb4"
+
+celery:
+  broker: 'redis://localhost:6379/0'
+  backend: 'redis://localhost:6379/0'
+  serializer: 'msgpack'
+  timezone: 'Asia/Shanghai'

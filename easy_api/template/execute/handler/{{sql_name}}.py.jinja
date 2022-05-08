@@ -1,0 +1,30 @@
+import logging
+import os.path
+from abc import ABC
+
+from {{ package_name }}.handler import api
+from {{ package_name }}.service import {{ sql_name }}_sql
+from easy_api.web import Handler, SqlResult, response_schema, request_schema
+
+file_dir = os.path.dirname(os.path.abspath(__file__))
+schema_file = os.path.join(file_dir, "schema/{{ sql_name }}.json")
+logger = logging.getLogger("{{ package_name }}.{{ sql_name }}")
+
+
+@api('/{{ sql_name }}')
+class {{ sql_name.title().replace('_', '') }}Handler(Handler, ABC):
+
+    @response_schema(SqlResult)
+    @request_schema("input_dict", schema_file=schema_file)
+    async def post(self, input_dict: dict) -> SqlResult:
+        """
+        ---
+        tags: [{{ package_name }}]
+        summary: {{ sql_name }}
+        """
+        try:
+            result = await {{ sql_name }}_sql.run(input_dict)
+            return SqlResult.success(result['result'], result['changes'])
+        except Exception as e:
+            logger.exception("run {{ package_name }}.{{ sql_name }} sql error")
+            return SqlResult.error(e)

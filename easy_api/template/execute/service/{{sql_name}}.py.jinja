@@ -1,0 +1,23 @@
+import os.path
+
+from easy_api.service.execute import execute
+from easy_api.template import render_template
+
+db_name = "default"
+file_dir = os.path.dirname(os.path.abspath(__file__))
+template_file = os.path.join(file_dir, "sql_template/{{ sql_name }}.sql.jinja")
+
+
+async def run(data: dict = None, **__):
+    """ run service
+    1. check data is correct
+    2. get template from file
+    3. render template with data
+    4. run service
+    """
+    if data is None:
+        data = {}
+
+    query, bind_params = await render_template(template_file, data)
+    return await execute(db_name, query, bind_params, autocommit=True)
+

@@ -1,0 +1,12 @@
+from abc import ABC
+
+import tornado.web
+
+from {{ package_name }}.handler import api
+
+
+@api('/')
+class MainHandler(tornado.web.RequestHandler, ABC):
+
+    async def get(self):
+        self.write("Hello, it's working!")

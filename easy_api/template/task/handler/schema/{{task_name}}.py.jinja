@@ -1,0 +1,10 @@
+from dataclasses import dataclass, field
+
+from dataclasses_jsonschema import JsonSchemaMixin
+
+
+@dataclass
+class {{ task_name.title().replace('_', '') }}Schema(JsonSchemaMixin):
+    """ {{ task_name }} schema """
+    name: str = field(metadata={"description": "The name will be echo to you"})
+    # TODO: add schema

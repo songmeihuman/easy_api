@@ -1,0 +1,8 @@
+from easy_api.service.task import run_in_worker
+
+
+@run_in_worker("demo", "hello")
+def run(name: str, **__) -> str:
+    """ run {{ task_name }}
+    """
+    return f"hello {name}"
