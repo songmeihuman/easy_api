@@ -4,7 +4,6 @@ server:
   timezone: 'Asia/Shanghai'
   apps:
     - easy_api
-    - demo
 
 swagger:
   enable: true
