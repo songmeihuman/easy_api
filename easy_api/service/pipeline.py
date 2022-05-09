@@ -7,6 +7,7 @@ from easy_api.tasks import get_task_by_name
 
 
 async def wrap_task(package_name, name, inputs, output, context):
+    # FIXME hard to debug
     job = get_task_by_name(package_name, name)
     result = await job(**inputs, **context)
     return trim_output.process({"result": result}, output, context)

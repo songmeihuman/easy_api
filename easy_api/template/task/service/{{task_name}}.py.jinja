@@ -1,7 +1,7 @@
 from easy_api.service.task import run_in_worker
 
 
-@run_in_worker("demo", "hello")
+@run_in_worker("{{ package_name }}", "{{ task_name }}")
 def run(name: str, **__) -> str:
     """ run {{ task_name }}
     """

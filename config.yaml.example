@@ -1,7 +1,10 @@
 server:
+  # 监听主机和端口
   host: "localhost"
   port: 8000
+  # 时区
   timezone: 'Asia/Shanghai'
+  # 启用的包
   apps:
     - easy_api
 
@@ -29,6 +32,7 @@ database:
 
 celery:
   broker: 'redis://localhost:6379/0'
+  # backend 只能用 redis
   backend: 'redis://localhost:6379/0'
   serializer: 'msgpack'
   timezone: 'Asia/Shanghai'
