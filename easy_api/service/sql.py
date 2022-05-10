@@ -10,12 +10,14 @@ from easy_api.service.package import exists_package
 logger = logging.getLogger("easy_api.sql")
 
 
-async def create_sql(package_name: str, sql_name: str, sql_jinja: str, mode: str, overwrite: bool = False):
+async def create_sql(package_name: str, sql_name: str, sql_jinja: str, database: str = "default", mode: str = "execute",
+                     overwrite: bool = False):
     """
     Create a sql file from a jinja template.
     :param package_name: The package name.
     :param sql_name: The sql file name.
     :param sql_jinja: The sql file content.
+    :param database: The database name.
     :param mode: The sql file mode: 'execute', 'executemany', 'paginate'.
     :param overwrite: Overwrite the sql file if it already exists.
     """
@@ -33,6 +35,13 @@ async def create_sql(package_name: str, sql_name: str, sql_jinja: str, mode: str
     if not os.path.isdir(template_path):
         raise ValueError("package sql_template not exist")
 
+    if database != "default":
+        for item in configs.database.instances:
+            if item.name == database:
+                break
+        else:
+            raise ValueError("database not exist")
+
     if not overwrite:
         if os.path.isfile(os.path.join(package_path, "handler", sql_name + ".py")):
             raise SqlExistsError(sql_name)
@@ -45,6 +54,7 @@ async def create_sql(package_name: str, sql_name: str, sql_jinja: str, mode: str
         {
             "package_name": package_name,
             "sql_name": sql_name,
+            "database_name": database,
             "sql_jinja": sql_jinja,
             "sql_schema": sql_schema,
         }

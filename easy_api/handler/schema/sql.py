@@ -7,5 +7,5 @@ from dataclasses_jsonschema import JsonSchemaMixin
 class SQLRequestSchema(JsonSchemaMixin):
     """SQLRequestSchema"""
     sql: str = field(metadata={"description": "the jinja template for the sql query"})
-    # override: bool = field(default=False, metadata={"description": "override existing sql"})
+    database: str = field(default="default", metadata={"description": "the database to use"})
     mode: str = field(default="execute", metadata={"description": "must be execute or paginate"})

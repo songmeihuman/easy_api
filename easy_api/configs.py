@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 from dataclasses import dataclass
+from typing import List
 
 import yaml
 
@@ -16,7 +17,7 @@ class Server:
     host: str
     port: int
     timezone: str
-    apps: [str]
+    apps: List[str]
 
 
 @dataclass(eq=False, frozen=True)
@@ -35,7 +36,7 @@ class DatabaseCell:
 @dataclass(eq=False, frozen=True)
 class Database:
     """ This is about database """
-    instances: [DatabaseCell]
+    instances: List[DatabaseCell]
 
 
 @dataclass(eq=False, frozen=True)

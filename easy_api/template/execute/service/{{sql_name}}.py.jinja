@@ -3,7 +3,7 @@ import os.path
 from easy_api.service.execute import execute
 from easy_api.template import render_template
 
-db_name = "default"
+db_name = "{{ database_name }}"
 file_dir = os.path.dirname(os.path.abspath(__file__))
 template_file = os.path.join(file_dir, "sql_template/{{ sql_name }}.sql.jinja")
 

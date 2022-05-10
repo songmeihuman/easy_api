@@ -38,7 +38,8 @@ class CreateSQLHandler(Handler, ABC):
             return Result.failre(f'sql is empty')
 
         try:
-            await create_sql(package_name, sql_name, sql_jinja=jinja_sql, overwrite=False, mode=data.mode)
+            await create_sql(package_name, sql_name, sql_jinja=jinja_sql, database=data.database, overwrite=False,
+                             mode=data.mode)
             return Result.success("ok")
         except Exception as e:
             logger.exception("create sql error")
