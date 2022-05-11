@@ -1,8 +1,9 @@
 from abc import ABC
 
 from easy_api.handler import api
+from easy_api.schema import Result, response_schema
 from easy_api.service.package import create_package
-from easy_api.web import Handler, Result, response_schema
+from easy_api.web import Handler
 
 
 @api(r'/package/(\w+)')

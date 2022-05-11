@@ -7,7 +7,7 @@ import tornado.web
 import uvloop
 from tornado.options import define, options
 
-from easy_api import application, celery, configs
+from easy_api import application, celery, configs, celery_waiter
 from easy_api import swagger
 
 define("config", default="./config.yaml", help="config file path")
@@ -26,6 +26,7 @@ def start_app():
     handlers = application.get_handlers()
     app = tornado.web.Application(handlers)
     swagger.install(app, handlers)
+    celery_waiter.install()
 
     if logging.DEBUG >= logging.root.level:
         for handler in handlers:

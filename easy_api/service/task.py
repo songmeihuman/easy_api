@@ -2,12 +2,11 @@ import functools
 import logging
 import os
 from asyncio import Future
+from typing import Awaitable, Callable
 
-import aioredis
-import msgpack
-import tornado.ioloop
 from kombu import uuid
 
+from easy_api import celery_waiter
 from easy_api import configs
 from easy_api.errors import PackageExistsError, PackageNotFoundError, TaskExistsError
 from easy_api.files import copytree_and_render
@@ -67,52 +66,14 @@ async def delete_task(package_name: str, task_name: str):
             os.remove(file_path)
 
 
-class WaitCeleryResult:
-    waiter = None
-    started = False
-
-    def __init__(self):
-        self.waiter = {}
-
-    async def start(self, redis_uri):
-        channel_prefix = "celery-task-meta-"
-        logger.debug('start wait celery result, redis_uri: %s', redis_uri)
-
-        redis = aioredis.from_url(redis_uri)
-        async with redis.pubsub() as p:
-            await p.psubscribe(channel_prefix + "*")
-            while True:
-                result = await p.get_message(ignore_subscribe_messages=True, timeout=10.0)
-                if result is None:
-                    continue
-
-                try:
-                    result = msgpack.unpackb(result['data'])
-                    f = self.waiter.pop(result['task_id'], None)
-                    if f:
-                        f.set_result(result['result'])
-                except Exception as e:
-                    logger.exception("result: %s, error: %s", result, e)
-
-    def subscribe(self, task_id, callback):
-        self.waiter[task_id] = callback
-        if not self.started:
-            self.started = True
-            redis_url = configs.celery.backend
-            tornado.ioloop.IOLoop.current().add_callback(wait_celery_result.start, redis_url)
-
-
-wait_celery_result = WaitCeleryResult()
-
-
-def run_in_worker(package_name: str, task_name: str):
-    def _(func):
+def run_in_worker(package_name: str, task_name: str) -> Callable[[str, str], Callable[[callable], Awaitable[dict]]]:
+    def _(func) -> Callable[[callable], Awaitable[dict]]:
         @functools.wraps(func)
         async def _fun_in_worker(*args, **kwargs):
             worker_task_id = uuid()
             future = Future()
-            wait_celery_result.subscribe(worker_task_id, future)
 
+            celery_waiter.wait_result(worker_task_id, future)
             invoke_task.apply_async(args=[package_name, task_name, args, kwargs], task_id=worker_task_id,
                                     ignore_result=False)
             result = await future

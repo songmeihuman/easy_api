@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import List
 
 from easy_api import configs
 from easy_api.errors import PackageExistsError, SqlExistsError, PackageNotFoundError
@@ -79,3 +80,7 @@ async def delete_sql(package_name: str, sql_name: str):
         file_path = os.path.join(package_path, file_name)
         if os.path.isfile(file_path):
             os.remove(file_path)
+
+
+async def list_sql(package_name: str) -> List[str]:
+    return []

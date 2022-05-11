@@ -2,8 +2,9 @@ import logging
 from abc import ABC
 
 from easy_api.handler import api
+from easy_api.schema import Result, response_schema
 from easy_api.service.task import create_task, delete_task
-from easy_api.web import Handler, Result, response_schema
+from easy_api.web import Handler
 
 logger = logging.getLogger("easy_api.handler.sql")
 

@@ -6,8 +6,8 @@ import tornado.web
 
 from easy_api import configs
 from easy_api.handler.package import CreatePackageHandler
+from easy_api.schema import Result
 from easy_api.tests.utils import assert_folders_same, assert_result
-from easy_api.web import Result
 
 
 @pytest.fixture

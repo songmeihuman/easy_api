@@ -3,8 +3,9 @@ from abc import ABC
 
 from easy_api.handler import api
 from easy_api.handler.schema.sql import SQLRequestSchema
+from easy_api.schema import Result, response_schema, request_schema
 from easy_api.service.sql import create_sql, delete_sql
-from easy_api.web import Handler, Result, response_schema, request_schema
+from easy_api.web import Handler
 
 logger = logging.getLogger("easy_api.handler.sql")
 
