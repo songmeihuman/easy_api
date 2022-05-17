@@ -4,7 +4,7 @@ from abc import ABC
 from easy_api.handler import api
 from easy_api.handler.schema.sql import SQLRequestSchema
 from easy_api.schema import Result, response_schema, request_schema
-from easy_api.service.sql import create_sql, delete_sql
+from easy_api.service.sql import create_sql, delete_sql, create_paging_sql
 from easy_api.web import Handler
 
 logger = logging.getLogger("easy_api.handler.sql")
@@ -12,6 +12,26 @@ logger = logging.getLogger("easy_api.handler.sql")
 
 @api(r'/package/(\w+)/sql/(\w+)')
 class CreateSQLHandler(Handler, ABC):
+
+    @classmethod
+    async def create_sql_wrap(cls, package_name: str, sql_name: str, data: SQLRequestSchema,
+                              overwrite: bool = False) -> Result:
+        jinja_sql = str(data.sql)
+        if not jinja_sql:
+            return Result.failre(f'sql is empty')
+
+        try:
+            if data.mode == 'execute':
+                await create_sql(package_name, sql_name, sql_jinja=jinja_sql, overwrite=overwrite)
+            elif data.mode == 'paging':
+                await create_paging_sql(package_name, sql_name, sql_jinja=jinja_sql, count_jinja=data.count_sql,
+                                        overwrite=overwrite)
+            else:
+                return Result.failre(f'unknown mode {data.mode}')
+            return Result.success("ok")
+        except Exception as e:
+            logger.exception("create sql error")
+            return Result.failre(str(e))
 
     @response_schema(Result)
     @request_schema('data', SQLRequestSchema)
@@ -34,17 +54,7 @@ class CreateSQLHandler(Handler, ABC):
             schema:
               type: string
         """
-        jinja_sql = str(data.sql)
-        if not jinja_sql:
-            return Result.failre(f'sql is empty')
-
-        try:
-            await create_sql(package_name, sql_name, sql_jinja=jinja_sql, database=data.database, overwrite=False,
-                             mode=data.mode)
-            return Result.success("ok")
-        except Exception as e:
-            logger.exception("create sql error")
-            return Result.failre(str(e))
+        return await self.create_sql_wrap(package_name, sql_name, data, overwrite=False)
 
     @response_schema(Result)
     @request_schema('data', SQLRequestSchema)
@@ -67,16 +77,7 @@ class CreateSQLHandler(Handler, ABC):
             schema:
               type: string
         """
-        jinja_sql = str(data.sql)
-        if not jinja_sql:
-            return Result.failre(f'sql is empty')
-
-        try:
-            await create_sql(package_name, sql_name, sql_jinja=jinja_sql, overwrite=True, mode=data.mode)
-            return Result.success("ok")
-        except Exception as e:
-            logger.exception("create sql error")
-            return Result.failre(str(e))
+        return await self.create_sql_wrap(package_name, sql_name, data, overwrite=True)
 
     @response_schema(Result)
     async def delete(self, package_name: str, sql_name: str) -> Result:

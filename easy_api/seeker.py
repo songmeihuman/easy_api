@@ -26,19 +26,19 @@ class Seeker:
         return seek_decorator(self, **kwargs)
 
 
-def walk_apps(package_name: str):
+def walk_apps(name: str):
     for app_name in configs.server.apps:
-        package_file_path = os.path.join(app_name, f'{package_name}.py')
-        package_path = os.path.join(app_name, package_name)
+        file_path = os.path.join(app_name, f'{name}.py')
+        may_be_folder = os.path.join(app_name, name)
 
-        if os.path.isfile(package_file_path):
+        if os.path.isfile(file_path):
             # only file
-            yield package_file_path
-        elif os.path.isdir(package_path):
+            yield file_path
+        elif os.path.isdir(may_be_folder):
             # there are many file in this package
-            yield from glob.iglob(package_path + '/**/*.py', recursive=True)
+            yield from glob.iglob(may_be_folder + '/**/*.py', recursive=True)
         else:
-            # not find
+            # not found
             continue
 
 

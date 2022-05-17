@@ -5,7 +5,8 @@ from abc import ABC
 from {{ package_name }}.handler import api
 from {{ package_name }}.handler.schema.{{ task_name }} import {{ task_schema_name }}
 from {{ package_name }}.service import {{ task_name }}
-from easy_api.web import Handler, Result, response_schema, request_schema
+from easy_api.schema import Result, response_schema, request_schema
+from easy_api.web import Handler
 
 logger = logging.getLogger("{{ package_name }}.{{ task_name }}")
 

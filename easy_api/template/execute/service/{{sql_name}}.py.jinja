@@ -8,7 +8,7 @@ file_dir = os.path.dirname(os.path.abspath(__file__))
 template_file = os.path.join(file_dir, "sql_template/{{ sql_name }}.sql.jinja")
 
 
-async def run(data: dict = None, **__):
+async def run(data: dict = None, template_part="sql", **__):
     """ run service
     1. check data is correct
     2. get template from file
@@ -18,6 +18,7 @@ async def run(data: dict = None, **__):
     if data is None:
         data = {}
 
+    data['TEMPLATE_PART'] = template_part
     query, bind_params = await render_template(template_file, data)
     return await execute(db_name, query, bind_params, autocommit=True)
 

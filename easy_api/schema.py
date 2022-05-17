@@ -94,6 +94,26 @@ class SqlResult(JsonSchemaMixin):
         return cls(code=code, msg=msg)
 
 
+@dataclass
+class SqlPagingResult(JsonSchemaMixin):
+    code: int = 0
+    msg: str = ""
+    data: Union[dict, list, str, int] = None
+    count: int = 0
+
+    @classmethod
+    def success(cls, data: Union[dict, list, str], count: int):
+        return cls(code=0, data=data, count=count)
+
+    @classmethod
+    def error(cls, error: Exception, code: int = -1):
+        return cls(code=code, msg=str(error))
+
+    @classmethod
+    def failre(cls, msg: str, code: int = -1):
+        return cls(code=code, msg=msg)
+
+
 def response_schema(schema: Type[JsonSchemaMixin] = None, status_code=200, content="application/json", description=""):
     """
     1. response schema can helper render swagger schema file

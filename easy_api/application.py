@@ -32,6 +32,10 @@ def get_handlers() -> List[Tuple[str, Any]]:
 
 
 def install():
+    """
+    auto imported python file or package.
+    it will autoload handler class to api_seeker when after imported.
+    """
     for path in walk_apps('handler'):
         spec = importlib.util.spec_from_file_location(path, path)
         module = importlib.util.module_from_spec(spec)
