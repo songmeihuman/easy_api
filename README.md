@@ -7,12 +7,12 @@ EasyAPI 是一个非常简单编写接口的工具：
 3. 每一个接口都会生成项目文件，可以手动修改生成后文件，满足个性化需求
 4. 自动生成 **openapi** 文档，附带有一个 UI 界面
 5. 支持非 SQL 接口，即自己写 Python 接口，会被当作一个任务在 [celery](https://github.com/celery/celery) 里面执行并返回结果
-6. 支持类似 linux 管道处理，SQL 接口生成的数据输入到 Python 接口里面二次加工
+6. 支持类似 linux 管道，例如：SQL 接口生成的数据输入到 Python 接口里面二次加工
 7. 不管是 SQL 接口，Python接口，管道操作都是异步非阻塞
 
 ## 安装
 
-本项目只支持 Pyhton3
+本项目只支持 Python3
 
 - 下载项目到本地
 
