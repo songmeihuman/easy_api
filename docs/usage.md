@@ -118,14 +118,14 @@ curl -X 'POST' \
       "package_name": "demo",
       "name": "test",
       "kwargs": {},
-      "output": {"sql_result": "v(result).v(result)"},
+      "output": {"sql_result": "{{ result.data }}"},
       "layer": 0
     },
     {
       "package_name": "demo",
       "name": "hello",
       "kwargs": {"name": "Duo"},
-      "output": {"task_result": "v(result)"},
+      "output": {"task_result": "{{ result.data }}"},
       "layer": 0
     }
   ]
@@ -167,14 +167,14 @@ curl -X 'POST' \
       "package_name": "demo"  ,
       "name": "hello",
       "kwargs": {"name": "Duo"},
-      "output": {"name": "v(result)"},
+      "output": {"name": "{{ result.data }}"},
       "layer": 0
     },
     {
       "package_name": "demo",
       "name": "hello",
       "kwargs": {},
-      "output": {"task_result": "v(result)"},
+      "output": {"task_result": "{{ result.data }}"},
       "layer": 1
     }
   ]
@@ -225,21 +225,21 @@ curl -X 'POST' \
       "package_name": "demo"  ,
       "name": "echo",
       "kwargs": {"num": 42},
-      "output": {"val1": "v(result)"},
+      "output": {"val1": "{{ result.data }}"},
       "layer": 0
     },
     {
       "package_name": "demo"  ,
       "name": "echo",
       "kwargs": {"num": 42},
-      "output": {"val2": "v(result)"},
+      "output": {"val2": "{{ result.data }}"},
       "layer": 0
     },
     {
       "package_name": "demo",
       "name": "sum",
       "kwargs": {},
-      "output": {"task_result": "v(result)"},
+      "output": {"task_result": "{{ result.data }}"},
       "layer": 1
     }
   ]
