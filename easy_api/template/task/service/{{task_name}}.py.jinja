@@ -1,8 +1,17 @@
+import logging
+
 from easy_api.service.task import run_in_worker
+from easy_api.schema import Result
+
+logger = logging.getLogger("{{ package_name }}.{{ task_name }}")
 
 
 @run_in_worker("{{ package_name }}", "{{ task_name }}")
-def run(name: str, **__) -> str:
+def run(name: str, **__) -> Result:
     """ run {{ task_name }}
     """
-    return f"hello {name}"
+    try:
+        return Result.success(f"hello {name}")
+    except Exception as e:
+        logger.exception("run {{ package_name }}.{{ task_name }} task error")
+        return Result.error(e)

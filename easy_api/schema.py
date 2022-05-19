@@ -114,6 +114,10 @@ class SqlPagingResult(JsonSchemaMixin):
         return cls(code=code, msg=msg)
 
 
+def is_successful_result(result) -> bool:
+    return result.code == 0
+
+
 def response_schema(schema: Type[JsonSchemaMixin] = None, status_code=200, content="application/json", description=""):
     """
     1. response schema can helper render swagger schema file
@@ -186,6 +190,7 @@ def request_schema(name: str, schema: Type[JsonSchemaMixin] = None, schema_file:
             ok, json_data = get_json_data(self.request.body)
             if not ok:
                 self.write(Result.failre("request body is invalid json data"))
+                return
 
             try:
                 kwargs[name] = schema.from_dict(json_data)

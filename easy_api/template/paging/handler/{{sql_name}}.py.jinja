@@ -3,7 +3,7 @@ from abc import ABC
 
 from {{ package_name }}.handler import api
 from {{ package_name }}.service import {{ sql_name }}
-from easy_api.schema import SqlResult, response_schema, request_schema
+from easy_api.schema import SqlPagingResult, response_schema, request_schema
 from easy_api.web import Handler
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,12 +13,12 @@ schema_file = os.path.join(file_dir, "schema/{{ sql_name }}.json")
 @api('/{{ sql_name }}')
 class {{ sql_name.title().replace('_', '') }}Handler(Handler, ABC):
 
-    @response_schema(SqlResult)
+    @response_schema(SqlPagingResult)
     @request_schema("input_dict", schema_file=schema_file)
-    async def post(self, input_dict: dict) -> SqlResult:
+    async def post(self, input_dict: dict) -> SqlPagingResult:
         """
         ---
         tags: [{{ package_name }}]
         summary: {{ sql_name }}
         """
-        return await {{ sql_name }}.run(input_dict)
+        return await select.run(input_dict)

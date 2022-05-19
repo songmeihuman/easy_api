@@ -1,0 +1,40 @@
+import logging
+import os.path
+
+from easy_api.service.execute import execute
+from easy_api.template import render_template
+from easy_api.schema import SqlPagingResult
+
+db_name = "{{ database_name }}"
+file_dir = os.path.dirname(os.path.abspath(__file__))
+template_file = os.path.join(file_dir, "sql_template/{{ sql_name }}.sql.jinja")
+logger = logging.getLogger("{{ package_name }}.{{ sql_name }}")
+
+
+async def run_sql(data: dict, template_part="sql"):
+    if data is None:
+        data = {}
+
+    data['TEMPLATE_PART'] = template_part
+    query, bind_params = await render_template(template_file, data)
+    return await execute(db_name, query, bind_params, autocommit=True)
+
+
+async def run(data: dict = None, **__) -> SqlPagingResult:
+    """ run service
+    1. check data is correct
+    2. get template from file
+    3. render template with data
+    4. run service
+    """
+    try:
+        result_count = await run_sql(data, template_part="count")
+        result_count = list(result_count["result"][0].values())[0]
+        if result_count > 0:
+            result = await run_sql(data, template_part="sql")
+        else:
+            result = {"result": []}
+        return SqlPagingResult.success(result['result'], result_count)
+    except Exception as e:
+        logger.exception("run {{ package_name }}.{{ sql_name }} sql error")
+        return SqlPagingResult.error(e)

@@ -1,4 +1,3 @@
-import logging
 from abc import ABC
 
 {% set task_schema_name = legal_task_name + 'Schema' %}
@@ -7,8 +6,6 @@ from {{ package_name }}.handler.schema.{{ task_name }} import {{ task_schema_nam
 from {{ package_name }}.service import {{ task_name }}
 from easy_api.schema import Result, response_schema, request_schema
 from easy_api.web import Handler
-
-logger = logging.getLogger("{{ package_name }}.{{ task_name }}")
 
 
 @api('/{{ task_name }}')
@@ -22,9 +19,4 @@ class {{ legal_task_name }}Handler(Handler, ABC):
         tags: [{{ package_name }}]
         summary: {{ task_name }}
         """
-        try:
-            result = await {{ task_name }}.run(input_schema.name)
-            return Result.success(result)
-        except Exception as e:
-            logger.exception("run {{ package_name }}.{{ task_name }} task error")
-            return Result.error(e)
+        return await {{ task_name }}.run(input_schema.name)

@@ -11,6 +11,7 @@ class TaskSchema(JsonSchemaMixin):
     name: str = field(metadata={"description": "The sql name or task name"})
     kwargs: dict = field(metadata={"description": "The default params will be pass to the task"})
     output: dict = field(metadata={"description": "The output of the task"})
+    condition: str = field(metadata={"description": "The condition of task, jinja2 template syntax"}, default="")
     layer: int = field(metadata={"description": "Synchronous execution in layer order"}, default=0)
 
 
