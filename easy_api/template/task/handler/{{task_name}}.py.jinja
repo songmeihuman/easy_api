@@ -4,6 +4,7 @@ from abc import ABC
 from {{ package_name }}.handler import api
 from {{ package_name }}.handler.schema.{{ task_name }} import {{ task_schema_name }}
 from {{ package_name }}.service import {{ task_name }}
+from {{ package_name }}.authorize import authorize
 from easy_api.schema import Result, response_schema, request_schema
 from easy_api.web import Handler
 
@@ -11,6 +12,7 @@ from easy_api.web import Handler
 @api('/{{ task_name }}')
 class {{ legal_task_name }}Handler(Handler, ABC):
 
+    @authorize("{{ package_name }}", "{{ sql_name }}")
     @response_schema(Result)
     @request_schema("input_schema", schema={{ task_schema_name }})
     async def post(self, input_schema: {{ task_schema_name }}) -> Result:
