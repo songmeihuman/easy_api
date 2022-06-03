@@ -57,22 +57,32 @@ async def run(task_configs: List[TaskSchema]):
     Create a group file from a jinja template.
     :param task_configs: The task inputs.
     """
+    # group by layer and then order execute task by layer
     task_dicts: Dict[int, List[TaskSchema]] = {}
     for task in task_configs:
         task_dicts.setdefault(task.layer, []).append(task)
 
+    # context for next layer tasks
     results = {}
 
     for layer in range(5):
         if layer not in task_dicts:
             break
 
-        tasks = (
+        # build the tasks for this layer
+        tasks = [
             wrap_task(x.package_name, x.name, x.kwargs, x.output, results)
             for x in task_dicts[layer]
             if execute_condition_template(x.condition, results)
-        )
-        results = await asyncio.gather(*tasks)
+        ]
+
+        if len(tasks) == 1:
+            result = await tasks[0]
+            results = [result]
+        else:
+            results = await asyncio.gather(*tasks)
+
+        # update the context by the results of this layer
         results = {k: v for d in results for k, v in d.items()}
 
     return results

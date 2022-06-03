@@ -22,10 +22,11 @@ class CreateSQLHandler(Handler, ABC):
 
         try:
             if data.mode == 'execute':
-                await create_sql(package_name, sql_name, sql_jinja=jinja_sql, overwrite=overwrite)
+                await create_sql(package_name, sql_name, sql_jinja=jinja_sql, overwrite=overwrite,
+                                 export_xlsx=data.export_xlsx)
             elif data.mode == 'paging':
                 await create_paging_sql(package_name, sql_name, sql_jinja=jinja_sql, count_jinja=data.count_sql,
-                                        overwrite=overwrite)
+                                        overwrite=overwrite, export_xlsx=data.export_xlsx)
             else:
                 return Result.failre(f'unknown mode {data.mode}')
             return Result.success("ok")

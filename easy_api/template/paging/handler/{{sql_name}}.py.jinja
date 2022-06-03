@@ -5,14 +5,18 @@ from {{ package_name }}.handler import api
 from {{ package_name }}.service import {{ sql_name }}
 from {{ package_name }}.authorize import authorize
 from easy_api.schema import SqlPagingResult, response_schema, request_schema
+from easy_api.service import pipeline
+from easy_api.handler.schema.pipeline import TaskSchema
+from easy_api.service.export import ExportType
 from easy_api.web import Handler
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
 schema_file = os.path.join(file_dir, "schema/{{ sql_name }}.json")
+{% set sql_upper_name = sql_name.title().replace('_', '') %}
 
 
 @api('/{{ sql_name }}')
-class {{ sql_name.title().replace('_', '') }}Handler(Handler, ABC):
+class {{ sql_upper_name }}Handler(Handler, ABC):
 
     @authorize("{{ package_name }}", "{{ sql_name }}")
     @response_schema(SqlPagingResult)
@@ -24,3 +28,52 @@ class {{ sql_name.title().replace('_', '') }}Handler(Handler, ABC):
         summary: {{ sql_name }}
         """
         return await select.run(input_dict)
+
+
+{% if export_xlsx %}
+@api('/{{ sql_name }}/export/csv')
+class {{ sql_upper_name }}ExportXlsxHandler(Handler, ABC):
+
+    @authorize("{{ package_name }}", "{{ sql_name }}")
+    @response_schema(SqlPagingResult)
+    @request_schema("input_dict", schema_file=schema_file)
+    async def post(self, input_dict: dict):
+        """
+        ---
+        tags: [{{ package_name }}]
+        summary: {{ sql_name }}
+        parameters:
+          - name: file_name
+            in: query
+            description: the download file name.
+            schema:
+              type: string
+          - name: header
+            in: query
+            description: csv header.
+            example: "name,age"
+            schema:
+              type: string
+        """
+        file_name = self.get_argument("file_name", "export")
+        header = self.get_argument("header", None)
+        tasks = [
+            TaskSchema(
+                package_name="{{ package_name }}",
+                name="{{ sql_name }}",
+                kwargs={"data": input_dict},
+                output={"data": {% raw %}"{{ result.data }}"{% endraw %}},
+                condition="",
+                layer=0
+            ),
+            TaskSchema(
+                package_name="easy_api",
+                name="export",
+                kwargs={"export_type": ExportType.XLSX, "handler": self, "file_name": file_name, "header": header},
+                output={"data": "ok"},
+                condition="",
+                layer=1
+            ),
+        ]
+        await pipeline.run(tasks)
+{% endif %}

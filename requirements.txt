@@ -27,3 +27,4 @@ marshmallow
 swagger-ui-py==21.12.8
 dataclasses-jsonschema==2.15.1
 python-jose[cryptography]==3.3.0
+XlsxWriter~=3.0.3
