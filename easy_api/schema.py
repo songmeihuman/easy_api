@@ -6,11 +6,13 @@ from typing import Union, Type, Any
 
 import dataclasses_jsonschema
 import orjson
+import tornado.web
 from dataclasses_jsonschema import JsonSchemaMixin
 from fastjsonschema import compile, JsonSchemaException
 from jinja2schema import infer, to_json_schema, JSONSchemaDraft4Encoder
 from jinja2schema.model import Unknown, Scalar
 
+from easy_api.service.export import export_xlsx
 from easy_api.web import logger
 
 compiled_schema_validate = {}
@@ -135,9 +137,19 @@ def response_schema(schema: Type[JsonSchemaMixin] = None, status_code=200, conte
         setattr(func, '__response_schema__', _schema)
 
         @functools.wraps(func)
-        async def inner_response_schema(self, *args, **kwargs):
+        async def inner_response_schema(self: tornado.web.RequestHandler, *args, **kwargs):
             result = await func(self, *args, **kwargs)
-            if isinstance(result, JsonSchemaMixin):
+            if not isinstance(result, JsonSchemaMixin):
+                return
+
+            output_type = self.get_argument("output_type", "json")
+
+            if output_type == "xlsx":
+                file_name = self.request.headers.get('export_xlsx_file_name', "export")
+                header = self.request.headers.get('export_xlsx_header', None)
+                await export_xlsx(self, result.data, file_name, header)
+            else:
+                # default
                 self.write(result)
 
         return inner_response_schema

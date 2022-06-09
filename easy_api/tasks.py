@@ -1,4 +1,5 @@
 import logging
+from dataclasses import asdict
 from importlib import import_module
 
 from celery import shared_task
@@ -22,6 +23,7 @@ def invoke_task(package_name, task_name, args, kwargs):
         return
 
     try:
-        return task.__wrapped__(*args, **kwargs)
+        result = task.__wrapped__(*args, **kwargs)
+        return asdict(result)
     except Exception as e:
         logger.exception(e)

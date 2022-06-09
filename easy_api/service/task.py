@@ -8,8 +8,9 @@ from kombu import uuid
 
 from easy_api import celery_waiter
 from easy_api import configs
-from easy_api.errors import PackageExistsError, PackageNotFoundError, TaskExistsError
+from easy_api.errors import PackageNotFoundError, TaskExistsError
 from easy_api.files import copytree_and_render
+from easy_api.schema import Result
 from easy_api.service.package import exists_package
 from easy_api.tasks import invoke_task
 
@@ -26,7 +27,7 @@ async def create_task(package_name: str, task_name: str):
         raise ValueError("task name must be lowercase.")
 
     if not await exists_package(package_name):
-        raise PackageExistsError(package_name)
+        raise PackageNotFoundError(package_name)
 
     template_path = os.path.join(configs.project_root, "easy_api/template/task")
     package_path = os.path.join(configs.project_root, package_name)
@@ -66,8 +67,8 @@ async def delete_task(package_name: str, task_name: str):
             os.remove(file_path)
 
 
-def run_in_worker(package_name: str, task_name: str) -> Callable[[str, str], Callable[[callable], Awaitable[dict]]]:
-    def _(func) -> Callable[[callable], Awaitable[dict]]:
+def run_in_worker(package_name: str, task_name: str) -> Callable[[str, str], Callable[[callable], Awaitable[Result]]]:
+    def _(func) -> Callable[[callable], Awaitable[Result]]:
         @functools.wraps(func)
         async def _fun_in_worker(*args, **kwargs):
             worker_task_id = uuid()
@@ -76,7 +77,11 @@ def run_in_worker(package_name: str, task_name: str) -> Callable[[str, str], Cal
             celery_waiter.wait_result(worker_task_id, future)
             invoke_task.apply_async(args=[package_name, task_name, args, kwargs], task_id=worker_task_id,
                                     ignore_result=False)
-            result = await future
+            celery_result = await future
+            result = Result()
+            result.code = celery_result["code"]
+            result.data = celery_result["data"]
+            result.msg = celery_result["msg"]
             return result
 
         return _fun_in_worker
