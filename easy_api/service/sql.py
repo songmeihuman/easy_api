@@ -38,7 +38,7 @@ async def create_sql(package_name: str, sql_name: str, nickname: str,
     common_pre_checker(package_name, sql_name, overwrite, database)
 
     package_path = os.path.join(configs.project_root, package_name)
-    template_path = os.path.join(configs.project_root, "easy_api/template/execute")
+    template_path = os.path.join(configs.project_root, "easy_api/template/sql")
     if not os.path.isdir(template_path):
         raise ValueError("package sql_template not exist")
 
