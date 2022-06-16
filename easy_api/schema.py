@@ -181,8 +181,13 @@ def request_schema(name: str, schema: Type[JsonSchemaMixin] = None, schema_file:
         def get_json_data(self: Handler) -> (bool, Any):
             if func_name == 'get':
                 text = self.get_argument('data', '')
+                if not text:
+                    text = "{}"
             else:
                 text = self.request.body
+
+            if not text:
+                return False, None
 
             try:
                 json_data = orjson.loads(text)
