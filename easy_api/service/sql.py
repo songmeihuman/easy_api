@@ -66,6 +66,7 @@ async def create_paging_sql(package_name: str, sql_name: str, nickname: str, sql
     Create a paging sql file from a jinja template.
     :param package_name: The package name.
     :param sql_name: The sql file name.
+    :param nickname: The sql nickname.
     :param sql_jinja: The sql file content.
     :param count_jinja: The count sql file content.
     :param database: The database name.
@@ -83,7 +84,7 @@ async def create_paging_sql(package_name: str, sql_name: str, nickname: str, sql
                        f"{sql_jinja}" \
                        " limit {{ _page_size }} offset {{ _page_size * (_page - 1) }}"
 
-    if not count_jinja:
+    if count_jinja is True:
         # wrap sql to count sql
         count_jinja = f"select count(*) as `count` from ({sql_jinja}) as _count"
 
@@ -92,7 +93,8 @@ async def create_paging_sql(package_name: str, sql_name: str, nickname: str, sql
         "sql_name": sql_name,
         "nickname": nickname,
         "database_name": database,
-        "sql_jinja": paging_sql_jinja,
+        "sql_jinja": sql_jinja,
+        "paging_sql_jinja": paging_sql_jinja,
         "count_jinja": count_jinja,
         "sql_schema": get_json_schema(paging_sql_jinja),
     }
