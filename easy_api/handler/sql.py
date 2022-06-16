@@ -21,13 +21,12 @@ class CreateSQLHandler(Handler, ABC):
             return Result.failre(f'sql is empty')
 
         try:
-            if data.mode == 'execute':
-                await create_sql(package_name, sql_name, sql_jinja=jinja_sql, overwrite=overwrite)
-            elif data.mode == 'paging':
+            if data.count_sql is False:
+                await create_sql(package_name, sql_name, sql_jinja=jinja_sql, overwrite=overwrite,
+                                 method=data.method, export_xlsx=data.export_xlsx)
+            else:
                 await create_paging_sql(package_name, sql_name, sql_jinja=jinja_sql, count_jinja=data.count_sql,
                                         overwrite=overwrite)
-            else:
-                return Result.failre(f'unknown mode {data.mode}')
             return Result.success("ok")
         except Exception as e:
             logger.exception("create sql error")

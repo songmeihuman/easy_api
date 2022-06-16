@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import List
+from typing import List, Union
 
 from easy_api import configs
 from easy_api.errors import SqlExistsError, PackageNotFoundError
@@ -36,7 +36,9 @@ def wrap_count_sql(sql: str) -> str:
 
 
 async def create_sql(package_name: str, sql_name: str, sql_jinja: str,
-                     database: str = "default", overwrite: bool = False):
+                     method: str = "post",
+                     database: str = "default", overwrite: bool = False,
+                     export_xlsx: Union[str, bool] = False):
     common_pre_checker(package_name, sql_name, overwrite, database)
 
     package_path = os.path.join(configs.project_root, package_name)
@@ -47,9 +49,11 @@ async def create_sql(package_name: str, sql_name: str, sql_jinja: str,
     render_context = {
         "package_name": package_name,
         "sql_name": sql_name,
+        "method": method,
         "database_name": database,
         "sql_jinja": sql_jinja,
         "sql_schema": get_json_schema(sql_jinja),
+        "export_xlsx": export_xlsx,
     }
 
     await copytree_and_render(

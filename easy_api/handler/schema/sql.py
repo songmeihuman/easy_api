@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Union
 
 from dataclasses_jsonschema import JsonSchemaMixin
 
@@ -7,10 +8,13 @@ from dataclasses_jsonschema import JsonSchemaMixin
 class SQLRequestSchema(JsonSchemaMixin):
     """SQLRequestSchema"""
     sql: str = field(metadata={"description": "the jinja template for the sql query"})
-    count_sql: str = field(
-        default="",
-        metadata={"description": "the jinja template for the sql query to count the number of rows, "
-                                 "it enables from paging mode. If not provided, "
-                                 "the content will automat generate from sql"})
-    mode: str = field(default="execute", metadata={"description": "must be execute or paging"})
     database: str = field(default="default", metadata={"description": "the database to use"})
+    method: str = field(default="post", metadata={"description": "get or post"})
+    count_sql: Union[bool, str] = field(
+        default=False,
+        metadata={"description": "the jinja template for the sql query to count the number of rows, "
+                                 "if provided true, the content will automate generate from sql, "
+                                 "or content from provided string, default is false."})
+    export_xlsx: Union[bool, str] = field(
+        default=False,
+        metadata={"description": "support export to xlsx"})

@@ -12,8 +12,7 @@ from fastjsonschema import compile, JsonSchemaException
 from jinja2schema import infer, to_json_schema, JSONSchemaDraft4Encoder
 from jinja2schema.model import Unknown, Scalar
 
-from easy_api.service.export import export_xlsx
-from easy_api.web import logger
+from easy_api.web import logger, Handler
 
 compiled_schema_validate = {}
 
@@ -137,19 +136,9 @@ def response_schema(schema: Type[JsonSchemaMixin] = None, status_code=200, conte
         setattr(func, '__response_schema__', _schema)
 
         @functools.wraps(func)
-        async def inner_response_schema(self: tornado.web.RequestHandler, *args, **kwargs):
+        async def inner_response_schema(self: Handler, *args, **kwargs):
             result = await func(self, *args, **kwargs)
-            if not isinstance(result, JsonSchemaMixin):
-                return
-
-            output_type = self.get_argument("output_type", "json")
-
-            if output_type == "xlsx":
-                file_name = self.request.headers.get('export_xlsx_file_name', "export")
-                header = self.request.headers.get('export_xlsx_header', None)
-                await export_xlsx(self, result.data, file_name, header)
-            else:
-                # default
+            if isinstance(result, JsonSchemaMixin):
                 self.write(result)
 
         return inner_response_schema
@@ -177,12 +166,24 @@ def request_schema(name: str, schema: Type[JsonSchemaMixin] = None, schema_file:
 
     def _(func):
         # helper render swagger schema
-        _schema = getattr(func, '__request_schema__', {})
-        _schema["default"] = {"schema": schema, "schema_file": schema_file, "description": description,
-                              "title": title, "content": "application/json"}
-        setattr(func, '__request_schema__', _schema)
+        func_name = func.__name__
+        if func_name == 'get':
+            _schema = getattr(func, '__path_schema__', {})
+            _schema["default"] = {"schema": schema, "schema_file": schema_file, "description": description,
+                                  "title": title, "content": "application/json"}
+            setattr(func, '__path_schema__', _schema)
+        else:
+            _schema = getattr(func, '__request_schema__', {})
+            _schema["default"] = {"schema": schema, "schema_file": schema_file, "description": description,
+                                  "title": title, "content": "application/json"}
+            setattr(func, '__request_schema__', _schema)
 
-        def get_json_data(text) -> (bool, Any):
+        def get_json_data(self: Handler) -> (bool, Any):
+            if func_name == 'get':
+                text = self.get_argument('data', '')
+            else:
+                text = self.request.body
+
             try:
                 json_data = orjson.loads(text)
             except ValueError:
@@ -193,13 +194,12 @@ def request_schema(name: str, schema: Type[JsonSchemaMixin] = None, schema_file:
                 except ValueError:
                     if logging.DEBUG >= logging.root.level:
                         logger.exception("request body is invalid json data", text)
-                    # self.write(Result.failre("request body is invalid json data"))
                     return False, None
 
             return True, json_data
 
-        async def validate_request_with_schema_class(self, *args, **kwargs):
-            ok, json_data = get_json_data(self.request.body)
+        async def validate_request_with_schema_class(self: Handler, *args, **kwargs):
+            ok, json_data = get_json_data(self)
             if not ok:
                 self.write(Result.failre("request body is invalid json data"))
                 return
@@ -217,8 +217,8 @@ def request_schema(name: str, schema: Type[JsonSchemaMixin] = None, schema_file:
             if isinstance(result, JsonSchemaMixin):
                 return result
 
-        async def validate_request_with_schema_file(self, *args, **kwargs):
-            ok, json_data = get_json_data(self.request.body)
+        async def validate_request_with_schema_file(self: Handler, *args, **kwargs):
+            ok, json_data = get_json_data(self)
             if not ok:
                 self.write(Result.failre("request body is invalid json data"))
 
