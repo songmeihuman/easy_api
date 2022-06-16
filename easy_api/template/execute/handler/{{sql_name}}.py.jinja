@@ -23,7 +23,7 @@ class {{ sql_name.title().replace('_', '') }}Handler(Handler, ABC):
         """
         ---
         tags: [{{ package_name }}]
-        summary: {{ sql_name }}
+        summary: {{ nickname }}
         """
         return await {{ sql_name }}.run(input_dict)
 

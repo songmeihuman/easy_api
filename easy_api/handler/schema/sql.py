@@ -7,6 +7,7 @@ from dataclasses_jsonschema import JsonSchemaMixin
 @dataclass
 class SQLRequestSchema(JsonSchemaMixin):
     """SQLRequestSchema"""
+    nickname: str = field(metadata={"description": "sql nickname"})
     sql: str = field(metadata={"description": "the jinja template for the sql query"})
     database: str = field(default="default", metadata={"description": "the database to use"})
     method: str = field(default="post", metadata={"description": "get or post"})

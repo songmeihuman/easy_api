@@ -5,9 +5,6 @@ from {{ package_name }}.handler import api
 from {{ package_name }}.service import {{ sql_name }}
 from {{ package_name }}.authorize import authorize
 from easy_api.schema import SqlPagingResult, response_schema, request_schema
-from easy_api.service import pipeline
-from easy_api.handler.schema.pipeline import TaskSchema
-from easy_api.service.export import ExportType
 from easy_api.web import Handler
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -25,7 +22,7 @@ class {{ sql_upper_name }}Handler(Handler, ABC):
         """
         ---
         tags: [{{ package_name }}]
-        summary: {{ sql_name }}
+        summary: {{ nickname }}
         parameters:
           - name: output_type
             in: query

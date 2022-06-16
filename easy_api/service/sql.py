@@ -31,12 +31,8 @@ def common_pre_checker(package_name: str, sql_name: str, overwrite: bool, databa
             raise SqlExistsError(sql_name)
 
 
-def wrap_count_sql(sql: str) -> str:
-    return "select count(*) as `count` from ({}) as _count".format(sql)
-
-
-async def create_sql(package_name: str, sql_name: str, sql_jinja: str,
-                     method: str = "post",
+async def create_sql(package_name: str, sql_name: str, nickname: str,
+                     sql_jinja: str, method: str = "post",
                      database: str = "default", overwrite: bool = False,
                      export_xlsx: Union[str, bool] = False):
     common_pre_checker(package_name, sql_name, overwrite, database)
@@ -49,6 +45,7 @@ async def create_sql(package_name: str, sql_name: str, sql_jinja: str,
     render_context = {
         "package_name": package_name,
         "sql_name": sql_name,
+        "nickname": nickname,
         "method": method,
         "database_name": database,
         "sql_jinja": sql_jinja,
@@ -63,7 +60,7 @@ async def create_sql(package_name: str, sql_name: str, sql_jinja: str,
     )
 
 
-async def create_paging_sql(package_name: str, sql_name: str, sql_jinja: str, count_jinja: str,
+async def create_paging_sql(package_name: str, sql_name: str, nickname: str, sql_jinja: str, count_jinja: str,
                             database: str = "default", overwrite: bool = False):
     """
     Create a paging sql file from a jinja template.
@@ -93,6 +90,7 @@ async def create_paging_sql(package_name: str, sql_name: str, sql_jinja: str, co
     render_context = {
         "package_name": package_name,
         "sql_name": sql_name,
+        "nickname": nickname,
         "database_name": database,
         "sql_jinja": paging_sql_jinja,
         "count_jinja": count_jinja,
