@@ -33,7 +33,7 @@ class CreateSQLHandler(Handler, ABC):
             return Result.failre(str(e))
 
     @response_schema(Result)
-    @request_schema('data', SQLRequestSchema)
+    @request_schema('data', schema=SQLRequestSchema)
     async def post(self, package_name: str, sql_name: str, data: SQLRequestSchema) -> Result:
         """ Create a sql api.
         ---
@@ -56,7 +56,7 @@ class CreateSQLHandler(Handler, ABC):
         return await self.create_sql_wrap(package_name, sql_name, data, overwrite=False)
 
     @response_schema(Result)
-    @request_schema('data', SQLRequestSchema)
+    @request_schema('data', schema=SQLRequestSchema)
     async def put(self, package_name: str, sql_name: str, data: SQLRequestSchema) -> Result:
         """ Update a sql api.
         ---

@@ -1,19 +1,16 @@
 import inspect
 import json
 import logging
-import os
 
-import orjson
 import swagger_ui
 from apispec import APISpec, BasePlugin, yaml_utils
 from apispec.exceptions import APISpecError
 from apispec.ext.marshmallow import MarshmallowPlugin
-from dataclasses_jsonschema import SchemaType
 from tornado.routing import URLSpec
 
 from easy_api import configs
 
-logger = logging.getLogger("easy_api.swagger")
+logger = logging.getLogger(__name__)
 
 
 def install(self, handlers):
@@ -32,75 +29,6 @@ def install(self, handlers):
         url_prefix=configs.swagger.path,
         title=configs.swagger.title,
     )
-
-
-def parse_response_schema(spec, operation, schema_dict):
-    """
-    add response schema to operations
-    """
-    if not schema_dict:
-        return
-    for status_code, info in schema_dict.items():
-        schema = info["schema"]
-        schema_name = schema.__name__
-        operation["responses"][status_code] = {
-            "content": {info["content"]: {"schema": schema_name}},
-            "description": info["description"]
-        }
-        # add schema to components
-        for name, schema_json in schema.json_schema(embeddable=True, schema_type=SchemaType.SWAGGER_V3).items():
-            if name not in spec.components.schemas:
-                spec.components.schema(name, schema_json)
-
-
-def parse_request_schema(spec, operation, schema_dict):
-    """add body schema to operations
-    """
-    if not schema_dict:
-        return
-    for _, info in schema_dict.items():
-        if info.get('schema'):
-            schema = info["schema"]
-            schema_name = schema.__name__
-            schema_json = schema.json_schema(embeddable=True, schema_type=SchemaType.SWAGGER_V3)
-        else:
-            schema_name = info.get('title') or os.path.split(info.get('schema_file'))[-1]
-            with open(info["schema_file"]) as f:
-                schema_json = {schema_name: orjson.loads(f.read())}
-
-        operation["requestBody"] = {
-            "content": {info["content"]: {"schema": schema_name}},
-            "required": True,
-            "description": info["description"]
-        }
-        # add schema to components
-        for name, schema in schema_json.items():
-            if name not in spec.components.schemas:
-                spec.components.schema(name, schema)
-
-
-def parse_path_schema(spec, operation, schema_dict):
-    """add path schema to operations"""
-    if not schema_dict:
-        return
-
-    for _, info in schema_dict.items():
-        if info.get('schema'):
-            schema = info["schema"]
-            schema_name = schema.__name__
-            schema_json = schema.json_schema(embeddable=True, schema_type=SchemaType.SWAGGER_V3)
-        else:
-            schema_name = info.get('title') or os.path.split(info.get('schema_file'))[-1]
-            with open(info["schema_file"]) as f:
-                schema_json = {schema_name: orjson.loads(f.read())}
-
-        operation["parameters"].append({
-            "in": "query",
-            "name": "data",
-            "content": {
-                "application/json": {"schema": schema_json[schema_name]}
-            }
-        })
 
 
 # copy from apispec
@@ -123,9 +51,9 @@ class TornadoPlugin(BasePlugin):
             method = getattr(handler_class, http_method)
             operation = {"responses": {}, "parameters": []}
 
-            parse_response_schema(self._spec, operation, getattr(method, "__response_schema__", {}))
-            parse_request_schema(self._spec, operation, getattr(method, "__request_schema__", {}))
-            parse_path_schema(self._spec, operation, getattr(method, "__path_schema__", {}))
+            specs = method.__dict__.pop("__easy_specs__", [])
+            for spec in specs:
+                spec.apply(self._spec, operation)
 
             operation_doc = yaml_utils.load_yaml_from_docstring(method.__doc__)
             if operation_doc:

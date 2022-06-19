@@ -4,7 +4,7 @@ from abc import ABC
 from {{ package_name }}.handler import api
 from {{ package_name }}.service import {{ sql_name }}
 from {{ package_name }}.authorize import authorize
-from easy_api.schema import SqlPagingResult, response_schema, request_schema
+from easy_api.schema import PagingResult, response_schema, request_schema
 from easy_api.web import Handler
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -17,9 +17,9 @@ sql_jinja = """{{ sql_jinja }}"""
 class {{ sql_upper_name }}Handler(Handler, ABC):
 
     @authorize("{{ package_name }}", "{{ sql_name }}")
-    @response_schema(SqlPagingResult)
+    @response_schema(PagingResult)
     @request_schema("input_dict", schema_file=schema_file)
-    async def post(self, input_dict: dict) -> SqlPagingResult:
+    async def post(self, input_dict: dict) -> PagingResult:
         """
         ---
         tags: [{{ package_name }}]

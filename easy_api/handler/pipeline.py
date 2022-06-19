@@ -14,7 +14,7 @@ logger = logging.getLogger("easy_api.handler.group")
 class PipelineHandler(Handler, ABC):
 
     @response_schema(Result)
-    @request_schema('data', PipelineRequestSchema)
+    @request_schema('data', schema=PipelineRequestSchema)
     async def post(self, data: PipelineRequestSchema) -> Result:
         """ Create a pipeline.
         ---

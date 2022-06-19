@@ -3,7 +3,7 @@ import os.path
 
 from easy_api.service.execute import execute
 from easy_api.template import render_template
-from easy_api.schema import SqlPagingResult
+from easy_api.schema import PagingResult
 
 db_name = "{{ database_name }}"
 file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -20,7 +20,7 @@ async def run_sql(data: dict, template_part="sql"):
     return await execute(db_name, query, bind_params, autocommit=True)
 
 
-async def run(data: dict = None, **__) -> SqlPagingResult:
+async def run(data: dict = None, **__) -> PagingResult:
     """ run service
     1. check data is correct
     2. get template from file
@@ -34,7 +34,7 @@ async def run(data: dict = None, **__) -> SqlPagingResult:
             result = await run_sql(data, template_part="sql")
         else:
             result = {"result": []}
-        return SqlPagingResult.success(result['result'], result_count)
+        return PagingResult.success(result['result'], result_count)
     except Exception as e:
         logger.exception("run {{ package_name }}.{{ sql_name }} sql error")
-        return SqlPagingResult.error(e)
+        return PagingResult.error(e)
