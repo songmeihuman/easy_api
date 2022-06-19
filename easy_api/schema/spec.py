@@ -75,7 +75,7 @@ class ParameterJsonFileSpec:
             schema_json = orjson.loads(f.read())
         parameters.append({
             "in": self.parameter_type,
-            "name": 'datas',
+            "name": 'Datas' if self.parameter_type == "header" else "body",
             "content": {
                 "application/json": {"schema": schema_json}
             }
