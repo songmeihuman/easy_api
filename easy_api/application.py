@@ -37,6 +37,7 @@ def install():
     it will autoload handler class to api_seeker when after imported.
     """
     for path in walk_apps('handler'):
-        spec = importlib.util.spec_from_file_location(path, path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        # spec = importlib.util.spec_from_file_location(path, path)
+        # module = importlib.util.module_from_spec(spec)
+        # spec.loader.exec_module(module)
+        __import__(path[:-3].replace('/', '.'))
