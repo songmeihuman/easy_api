@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import pytest
 
-from easy_api.service import execute
+from easy_api.service import db
 
 DB_NAME = "easy_api_test"
 
@@ -49,7 +49,7 @@ RULES = [
 @pytest.mark.usefixtures("setup_mysql")
 @pytest.mark.parametrize(["query", "bind_params", "expected_field", "expected"], RULES)
 async def test_basic_mysql(query, bind_params, expected_field, expected):
-    result = await execute.execute("mysql", query, bind_params)
+    result = await db.execute("mysql", query, bind_params)
     if expected_field == "result":
         TestCase().assertListEqual(result["result"], expected)
     elif expected_field == "changes":
@@ -61,7 +61,7 @@ async def test_basic_mysql(query, bind_params, expected_field, expected):
 @pytest.mark.usefixtures("setup_sqlite")
 @pytest.mark.parametrize(["query", "bind_params", "expected_field", "expected"], RULES)
 async def test_basic_sqlite(query, bind_params, expected_field, expected):
-    result = await execute.execute("sqlite", query, bind_params)
+    result = await db.execute("sqlite", query, bind_params)
     if expected_field == "result":
         TestCase().assertListEqual(result["result"], expected)
     elif expected_field == "changes":
@@ -73,5 +73,5 @@ async def test_basic_sqlite(query, bind_params, expected_field, expected):
 @pytest.mark.usefixtures("setup_mysql")
 async def test_mysql_datetime():
     query = f"select now() as now"
-    result = await execute.execute("mysql", query)
+    result = await db.execute("mysql", query)
     assert isinstance(result["result"][0]["now"], str)

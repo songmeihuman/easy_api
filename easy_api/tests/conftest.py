@@ -7,7 +7,7 @@ import aiosqlite
 import pytest
 
 from easy_api import configs
-from easy_api.service import execute
+from easy_api.service import db
 
 DB_NAME = "easy_api_test"
 database_items = [
@@ -30,7 +30,7 @@ def tmp_dst():
 
 
 async def create_test_table_in_mysql(datas):
-    db_config = execute.find_config("mysql")
+    db_config = db.find_config("mysql")
     conn = await aiomysql.connect(host=db_config.host, port=db_config.port, db=db_config.db,
                                   user=db_config.user, password=db_config.password)
 
@@ -47,13 +47,13 @@ async def create_test_table_in_mysql(datas):
 
 
 async def create_test_table_in_sqlite(datas):
-    db_config = execute.find_config("sqlite")
+    db_config = db.find_config("sqlite")
     sql = f"""CREATE TABLE {DB_NAME} (name text, age real)"""
-    db = await aiosqlite.connect(db_config.db)
-    await db.execute(sql)
-    await db.executemany(f"INSERT INTO {DB_NAME} (name, age) VALUES (?, ?)", datas)
-    await db.commit()
-    return db
+    conn = await aiosqlite.connect(db_config.db)
+    await conn.execute(sql)
+    await conn.executemany(f"INSERT INTO {DB_NAME} (name, age) VALUES (?, ?)", datas)
+    await conn.commit()
+    return conn
 
 
 async def drop_test_table_in_mysql(conn):
