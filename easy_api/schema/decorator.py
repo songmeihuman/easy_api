@@ -1,14 +1,18 @@
 import functools
 import logging
-from typing import Type, Callable
+from dataclasses import dataclass, field
+from io import BytesIO
+from typing import Type, Callable, NewType
+from openpyxl import load_workbook
 
-from dataclasses_jsonschema import JsonSchemaMixin
+from dataclasses_jsonschema import JsonSchemaMixin, FieldEncoder
 
 from easy_api.web import Handler
 from .entity import Result
 from .spec import ResponseSchemaSpec, RequestBodyJsonFileSpec, RequestBodySchemaSpec, ParameterSchemaSpec, \
     ParameterJsonFileSpec
 from .utils import safe_load_json
+from ..service.data_file import get_datas_from_file
 
 log = logging.getLogger(__name__)
 
@@ -44,8 +48,7 @@ def response_schema(schema: Type[JsonSchemaMixin] = None, status_code=200, conte
     return _
 
 
-def request_schema(name: str, content_type: str = "application/json",
-                   schema: Type[JsonSchemaMixin] = None, schema_file: str = None):
+def request_schema(name: str, schema: Type[JsonSchemaMixin] = None, schema_file: str = None):
     """
     1. request schema can help render swagger schema file
     2. validate request data by schema
@@ -53,7 +56,6 @@ def request_schema(name: str, content_type: str = "application/json",
     4. inject validated data to method by name
 
     :param name: inject name to method
-    :param content_type: the content type for request, default is application/json
     :param schema: schema type
     :param schema_file: the file container schema json schema
     """
@@ -62,6 +64,8 @@ def request_schema(name: str, content_type: str = "application/json",
         raise ValueError("schema or schema_file must be not None")
 
     def _(func):
+        content_type = "application/json"
+
         if schema_file:
             spec = RequestBodyJsonFileSpec(name, schema_file, content_type=content_type)
         else:
@@ -155,5 +159,45 @@ def query_schema(name: str, schema: Type[JsonSchemaMixin] = None, schema_file: s
                 return result
 
         return parameters_schema_inner
+
+    return _
+
+
+Uploader = NewType('Uploader', str)
+
+
+class UploaderField(FieldEncoder):
+
+    @property
+    def json_schema(self):
+        return {'type': 'string', 'format': 'binary'}
+
+
+JsonSchemaMixin.register_field_encoders({Uploader: UploaderField()})
+
+
+@dataclass
+class BatchUploadSchema(JsonSchemaMixin):
+    """ list_datas schema """
+    upload_file: Uploader = field(metadata={"description": "batch upload datas by xlsx file"})
+    fields: str = field(metadata={
+        "description": "the relationship between header of upload file and database field name",
+    }, default="field1:title1,field2:title2")
+
+
+def batch_upload_schema(name: str):
+
+    def _(func):
+        spec = RequestBodySchemaSpec(name, BatchUploadSchema, content_type="multipart/form-data")
+        apply_spec_to_api(func, spec)
+
+        @functools.wraps(func)
+        async def batch_upload_schema_inner(self: Handler, *args, **kwargs):
+            upload_file = self.request.files["upload_file"][0]
+            values = get_datas_from_file(upload_file["filename"], upload_file["body"])
+            kwargs[name] = values
+            return await func(self, *args, **kwargs)
+
+        return batch_upload_schema_inner
 
     return _

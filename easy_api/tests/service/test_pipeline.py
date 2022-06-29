@@ -9,7 +9,7 @@ from easy_api.service.pipeline import wrap_task, run
 
 def async_echo(v):
     async def _(**__):
-        return v
+        return Result.success(v)
 
     return _
 
@@ -24,8 +24,7 @@ def async_require_arguments(v: Result):
 
 
 @pytest.mark.parametrize(["data", "output", "expect", "message"], (
-        (Result.success({"name": "Duo", "age": 18}), {"name": "{{ result.data.name }}"}, {"name": "Duo"}, "dict"),
-        # (Result.success([{"name": "Lvy"}, {"name": "Evelyn"}]), {"names": "{{ result.data.values() }}"}, {"names": ["Lvy", "Evelyn"]}, "list"),
+        ({"name": "Duo", "age": 18}, {"name": "{{ result.data.name }}"}, {"name": "Duo"}, "dict"),
 ))
 async def test_wrap_task(data, output, expect, message):
     package_name = "test"

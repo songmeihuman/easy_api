@@ -18,6 +18,7 @@ class ResponseSchemaSpec:
     def apply(self, spec, operation):
         values = operation.setdefault("responses", {}).setdefault(str(self.status_code), {}).setdefault("content", {})
         values[self.content_type] = {"schema": self.schema.__name__}
+
         for name, schema_json in self.schema.json_schema(embeddable=True, schema_type=VERSION).items():
             if name not in spec.components.schemas:
                 spec.components.schema(name, schema_json)
@@ -56,9 +57,12 @@ class RequestBodySchemaSpec:
         content[self.content_type] = {"schema": self.title}
 
         # add schema to components
-        if self.title not in spec.components.schemas:
-            schema_json = self.schema.json_schema(embeddable=True, schema_type=SchemaType.SWAGGER_V3)
-            spec.components.schema(self.title, schema_json[self.title])
+        # if self.title not in spec.components.schemas:
+        #     schema_json = self.schema.json_schema(embeddable=True, schema_type=SchemaType.SWAGGER_V3)
+        #     spec.components.schema(self.title, schema_json[self.title])
+        for name, schema_json in self.schema.json_schema(embeddable=True, schema_type=VERSION).items():
+            if name not in spec.components.schemas:
+                spec.components.schema(name, schema_json)
 
 
 class ParameterJsonFileSpec:
