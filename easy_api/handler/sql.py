@@ -4,7 +4,7 @@ from abc import ABC
 from easy_api.handler import api
 from easy_api.handler.schema.sql import SQLRequestSchema
 from easy_api.schema import Result, response_schema, request_schema
-from easy_api.service.sql import create_sql, delete_sql, create_paging_sql
+from easy_api.service.sql import create_sql, delete_sql, create_pagination_sql
 from easy_api.web import Handler
 
 logger = logging.getLogger("easy_api.handler.sql")
@@ -25,8 +25,8 @@ class CreateSQLHandler(Handler, ABC):
                 await create_sql(package_name, sql_name, data.nickname, sql_jinja=jinja_sql, overwrite=overwrite,
                                  method=data.method, export_xlsx=data.export_xlsx)
             else:
-                await create_paging_sql(package_name, sql_name, data.nickname, sql_jinja=jinja_sql, count_jinja=data.count_sql,
-                                        overwrite=overwrite)
+                await create_pagination_sql(package_name, sql_name, data.nickname, sql_jinja=jinja_sql, count_jinja=data.count_sql,
+                                            overwrite=overwrite)
             return Result.success("ok")
         except Exception as e:
             logger.exception("create sql error")

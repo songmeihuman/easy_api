@@ -9,10 +9,10 @@ database:
   instances:
     - name: "default"
       type: "sqlite"
-      db: "sqlite.db"
+      db: "sqlite.test.db"
     - name: "sqlite"
       type: "sqlite"
-      db: "sqlite.db"
+      db: "sqlite.test.db"
     - name: "mysql"
       type: "mysql"
       db: "mysql"

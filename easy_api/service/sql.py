@@ -11,11 +11,11 @@ from easy_api.service.package import exists_package
 logger = logging.getLogger("easy_api.sql")
 
 
-def common_pre_checker(package_name: str, sql_name: str, overwrite: bool, database: str = "default"):
+async def common_pre_checker(package_name: str, sql_name: str, overwrite: bool, database: str = "default"):
     if sql_name.lower() != sql_name:
         raise ValueError("sql name must be lowercase.")
 
-    if not exists_package(package_name):
+    if not await exists_package(package_name):
         raise PackageNotFoundError(package_name)
 
     if database != "default":
@@ -35,7 +35,7 @@ async def create_sql(package_name: str, sql_name: str, nickname: str,
                      sql_jinja: str, method: str = "post",
                      database: str = "default", overwrite: bool = False,
                      export_xlsx: Union[str, bool] = False):
-    common_pre_checker(package_name, sql_name, overwrite, database)
+    await common_pre_checker(package_name, sql_name, overwrite, database)
 
     package_path = os.path.join(configs.project_root, package_name)
     template_path = os.path.join(configs.project_root, "easy_api/template/sql")
@@ -60,10 +60,10 @@ async def create_sql(package_name: str, sql_name: str, nickname: str,
     )
 
 
-async def create_paging_sql(package_name: str, sql_name: str, nickname: str, sql_jinja: str, count_jinja: str,
-                            database: str = "default", overwrite: bool = False):
+async def create_pagination_sql(package_name: str, sql_name: str, nickname: str, sql_jinja: str, count_jinja: str,
+                                database: str = "default", overwrite: bool = False):
     """
-    Create a paging sql file from a jinja template.
+    Create a pagination sql file from a jinja template.
     :param package_name: The package name.
     :param sql_name: The sql file name.
     :param nickname: The sql nickname.
@@ -72,10 +72,10 @@ async def create_paging_sql(package_name: str, sql_name: str, nickname: str, sql
     :param database: The database name.
     :param overwrite: Overwrite the sql file if it already exists.
     """
-    common_pre_checker(package_name, sql_name, overwrite, database)
+    await common_pre_checker(package_name, sql_name, overwrite, database)
 
     package_path = os.path.join(configs.project_root, package_name)
-    template_path = os.path.join(configs.project_root, "easy_api/template/paging")
+    template_path = os.path.join(configs.project_root, "easy_api/template/pagination")
     if not os.path.isdir(template_path):
         raise ValueError("package sql_template not exist")
 

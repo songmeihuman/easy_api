@@ -1,9 +1,11 @@
 import os
-from typing import Type
+from typing import Type, Any
 
 import orjson
 from dataclasses_jsonschema import JsonSchemaMixin
 from dataclasses_jsonschema import SchemaType
+
+from easy_api.schema.validate import validate_with_schema_file, validate_with_schema_class
 
 VERSION = SchemaType.SWAGGER_V3
 
@@ -38,10 +40,12 @@ class RequestBodyJsonFileSpec:
 
         content = operation.setdefault("requestBody", {}).setdefault("content", {})
         content[self.content_type] = {"schema": schema_json}
-
         # add schema to components
         # if self.title not in spec.components.schemas:
         #     spec.components.schema(self.title, schema_json)
+
+    def validate(self, data) -> (str, Any):
+        return validate_with_schema_file(data, self.schema_file)
 
 
 class RequestBodySchemaSpec:
@@ -64,6 +68,9 @@ class RequestBodySchemaSpec:
             if name not in spec.components.schemas:
                 spec.components.schema(name, schema_json)
 
+    def validate(self, data) -> (str, Any):
+        return validate_with_schema_class(data, self.schema)
+
 
 class ParameterJsonFileSpec:
 
@@ -85,6 +92,9 @@ class ParameterJsonFileSpec:
             }
         })
 
+    def validate(self, data) -> (str, Any):
+        return validate_with_schema_file(data, self.schema_file)
+
 
 class ParameterSchemaSpec:
 
@@ -104,3 +114,6 @@ class ParameterSchemaSpec:
                 "application/json": {"schema": schema_json[self.title]}
             }
         })
+
+    def validate(self, data) -> (str, Any):
+        return validate_with_schema_class(data, self.schema)

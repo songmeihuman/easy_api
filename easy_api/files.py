@@ -6,11 +6,27 @@ import shutil
 
 import aiofiles
 from aiocache import cached
-from jinja2 import Template
+from jinja2 import Template, Environment, BaseLoader, TemplateNotFound
 
-logger = logging.getLogger("easy_api.files")
+log = logging.getLogger(__name__)
 
 __all__ = ["read_file", "copytree_and_render"]
+
+
+class MyLoader(BaseLoader):
+
+    def __init__(self, path):
+        self.path = path
+
+    def get_source(self, environment, template):
+        path = os.path.join(self.path, template)
+        if not os.path.exists(path):
+            raise TemplateNotFound(template)
+        mtime = os.path.getmtime(path)
+        with open(path) as f:
+            source = f.read()
+        return source, path, lambda: mtime == os.path.getmtime(path)
+
 
 
 @cached()
@@ -37,12 +53,18 @@ def _copyfile(context: dict, src: str, dst: str, *, follow_symlinks=True):
         with open(src, "r") as out_fp:
             with open(origin_dst, "w") as in_fp:
                 # render sql_template from src to dst
-                dst_content = Template(out_fp.read(), trim_blocks=True, lstrip_blocks=True).render(context)
+                # dst_content = Template(out_fp.read(), trim_blocks=True, lstrip_blocks=True).render(context)
+                try:
+                    e = Environment(loader=MyLoader("easy_api/template/base"), trim_blocks=True, lstrip_blocks=True).from_string(out_fp.read())
+                    dst_content = e.render(context)
+                except Exception as e:
+                    log.exception("render error")
+                    raise
                 in_fp.write(dst_content)
-        logger.debug("copy file: %s -> %s", src, origin_dst)
+        log.debug("copy file: %s -> %s", src, origin_dst)
         return
 
-    logger.debug("copy file: %s -> %s", src, dst)
+    log.debug("copy file: %s -> %s", src, dst)
     return shutil.copy2(src, dst, follow_symlinks=follow_symlinks)
 
 

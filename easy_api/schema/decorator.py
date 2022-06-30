@@ -1,9 +1,7 @@
 import functools
 import logging
 from dataclasses import dataclass, field
-from io import BytesIO
 from typing import Type, Callable, NewType
-from openpyxl import load_workbook
 
 from dataclasses_jsonschema import JsonSchemaMixin, FieldEncoder
 
@@ -186,7 +184,6 @@ class BatchUploadSchema(JsonSchemaMixin):
 
 
 def batch_upload_schema(name: str):
-
     def _(func):
         spec = RequestBodySchemaSpec(name, BatchUploadSchema, content_type="multipart/form-data")
         apply_spec_to_api(func, spec)
