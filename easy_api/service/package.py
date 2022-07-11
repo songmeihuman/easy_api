@@ -2,7 +2,7 @@ import logging
 import os
 
 from easy_api import configs
-from easy_api.files import copytree_and_render
+from easy_api.service.files import copytree_and_render
 
 logger = logging.getLogger("easy_api.package")
 

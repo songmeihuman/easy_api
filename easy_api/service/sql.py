@@ -3,8 +3,8 @@ import os
 from typing import List, Union
 
 from easy_api import configs
-from easy_api.errors import SqlExistsError, PackageNotFoundError
-from easy_api.files import copytree_and_render
+from easy_api.errors import SQLExistsError, PackageNotFoundError
+from easy_api.service.files import copytree_and_render
 from easy_api.schema import get_json_schema
 from easy_api.service.package import exists_package
 
@@ -28,7 +28,7 @@ async def common_pre_checker(package_name: str, sql_name: str, overwrite: bool, 
     package_path = os.path.join(configs.project_root, package_name)
     if not overwrite:
         if os.path.isfile(os.path.join(package_path, "handler", sql_name + ".py")):
-            raise SqlExistsError(sql_name)
+            raise SQLExistsError
 
 
 async def create_sql(package_name: str, sql_name: str, nickname: str,
@@ -116,7 +116,7 @@ async def delete_sql(package_name: str, sql_name: str):
         raise ValueError("sql name must be lowercase.")
 
     if not await exists_package(package_name):
-        raise PackageNotFoundError(package_name)
+        raise PackageNotFoundError
 
     package_path = os.path.join(configs.project_root, package_name)
     for file_name in (f"handler/{sql_name}.py", f"handler/schema/{sql_name}.json", f"service/{sql_name}_sql.py",

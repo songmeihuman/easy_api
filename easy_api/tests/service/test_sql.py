@@ -5,7 +5,7 @@ import shutil
 import pytest
 
 from easy_api import configs
-from easy_api.errors import SqlExistsError
+from easy_api.errors import SQLExistsError
 from easy_api.schema import get_json_schema
 from easy_api.service.package import create_package
 from easy_api.service.sql import create_sql, delete_sql
@@ -31,7 +31,7 @@ async def create_test_sql(tmp_package,
                           mode="execute",
                           overwrite=True
                           ):
-    await create_sql(tmp_package, sql_name, sql_jinja, mode, overwrite)
+    await create_sql(tmp_package, sql_name, sql_name, sql_jinja=sql_jinja, overwrite=overwrite)
 
 
 async def test_create_execute_sql(tmp_package):
@@ -52,7 +52,7 @@ async def test_create_execute_sql(tmp_package):
 
 async def test_create_with_exists_package(tmp_package):
     await create_test_sql(tmp_package)
-    with pytest.raises(SqlExistsError):
+    with pytest.raises(SQLExistsError):
         await create_test_sql(tmp_package, overwrite=False)
 
 

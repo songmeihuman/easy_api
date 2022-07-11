@@ -1,58 +1,45 @@
-class PackageExistsError(Exception):
-    _package_name = None
+import types
 
-    def __init__(self, package_name):
-        self._package_name = package_name
-
-    def __str__(self):
-        return f"Package {self._package_name} already exists"
+from easy_api.schema import Result
 
 
-class PackageNotFoundError(Exception):
-    _package_name = None
+class EasyException(Exception):
+    code: int = None
+    message: str = None
+    message_kwargs: dict = None
 
-    def __init__(self, package_name):
-        self._package_name = package_name
+    def format(self, **kwargs):
+        self.message_kwargs = kwargs
+        return self
 
     def __str__(self):
-        return f"Package {self._package_name} not found"
+        return self.message.format(**self.message_kwargs) if self.message_kwargs else self.message
+
+    def to_result(self):
+        return Result.failre(str(self), self.code)
 
 
-class SqlExistsError(Exception):
-    _sql_name = None
-
-    def __init__(self, sql_name):
-        self._sql_name = sql_name
-
-    def __str__(self):
-        return f"Sql {self._sql_name} already exists"
+def e(name: str, code: int, message: str):
+    cls =  types.new_class(name, bases=(EasyException,))
+    cls.code = code
+    cls.message = message
+    cls.__module__ = __name__
+    return cls
 
 
-class SqlNotFoundError(Exception):
-    _sql_name = None
+# common errors, error number start at 9999
+UnknownError = e("UnknownError", 9999, "Unknown error")
 
-    def __init__(self, package_name):
-        self._sql_name = package_name
+# package errors, error number start at 9899
+PackageExistsError = e("PackageExistsError", 9899, "Package already exists")
+PackageNotFoundError = e("PackageNotFoundError", 9898, "Package not found")
 
-    def __str__(self):
-        return f"Sql {self._sql_name} not found"
+# sql errors, error number start at 9799
+SQLExistsError = e("SQLExistsError", 9899, "SQL already exists")
+SQLNotFoundError = e("SQLNotFoundError", 9898, "SQL not found")
 
+# task errors, error number start at 9699
+TaskExistsError = e("TaskExistsError", 9699, "Task already exists")
 
-class TaskExistsError(Exception):
-    _task_name = None
-
-    def __init__(self, name):
-        self._task_name = name
-
-    def __str__(self):
-        return f"Task {self._task_name} already exists"
-
-
-class GroupExistsError(Exception):
-    _group_name = None
-
-    def __init__(self, name):
-        self._group_name = name
-
-    def __str__(self):
-        return f"Group {self._group_name} already exists"
+# group errors, error number start at 9599
+GroupExistsError = e("GroupExistsError", 9599, "Group already exists")

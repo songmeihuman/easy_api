@@ -6,10 +6,10 @@ from typing import Awaitable, Callable
 
 from kombu import uuid
 
-from easy_api import celery_waiter
+from easy_api.service import celery_waiter
 from easy_api import configs
 from easy_api.errors import PackageNotFoundError, TaskExistsError
-from easy_api.files import copytree_and_render
+from easy_api.service.files import copytree_and_render
 from easy_api.schema import Result
 from easy_api.service.package import exists_package
 from easy_api.tasks import invoke_task
@@ -35,7 +35,7 @@ async def create_task(package_name: str, task_name: str):
         raise ValueError("package task_template not exist")
 
     if os.path.isfile(os.path.join(package_path, "handler", task_name + ".py")):
-        raise TaskExistsError(task_name)
+        raise TaskExistsError
 
     await copytree_and_render(
         template_path,
@@ -58,7 +58,7 @@ async def delete_task(package_name: str, task_name: str):
         raise ValueError("task name must be lowercase.")
 
     if not await exists_package(package_name):
-        raise PackageNotFoundError(package_name)
+        raise PackageNotFoundError
 
     package_path = os.path.join(configs.project_root, package_name)
     for file_name in (f"handler/{task_name}.py", f"handler/schema/{task_name}.py", f"service/{task_name}_task.py"):

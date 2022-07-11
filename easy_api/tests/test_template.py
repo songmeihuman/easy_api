@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from easy_api.template import render_template, render_string
+from easy_api.service.template import render_template, render_string
 
 file_dir = os.path.dirname(os.path.realpath(__file__))
 template_dir = os.path.join(file_dir, 'template')

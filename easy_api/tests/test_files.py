@@ -3,7 +3,7 @@ import shutil
 
 import pytest
 
-from easy_api.files import read_file, copytree_and_render
+from easy_api.service.files import read_file, copytree_and_render
 from easy_api.tests.utils import assert_folders_same
 
 file_dir = os.path.dirname(os.path.realpath(__file__))

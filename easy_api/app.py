@@ -7,7 +7,8 @@ import tornado.web
 import uvloop
 from tornado.options import define, options
 
-from easy_api import application, celery, configs, celery_waiter
+from easy_api import application, celery, configs
+from easy_api.service import celery_waiter
 from easy_api.schema import swagger
 
 define("config", default="./config.yaml", help="config file path")

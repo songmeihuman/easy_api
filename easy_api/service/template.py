@@ -2,7 +2,7 @@ from typing import Tuple
 
 from jinjasql import JinjaSql
 
-from .files import read_file
+from easy_api.service.files import read_file
 
 
 async def render_template(template_path: str, params: dict) -> Tuple[str, list]:

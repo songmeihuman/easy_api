@@ -1,0 +1,17 @@
+@api('/{{ sql_name }}.xlsx')
+class {{ sql_name.title().replace('_', '') }}Handler(Handler, ABC):
+
+    @authorize("{{ package_name }}", "{{ sql_name }}")
+    @request_schema("input_dict", schema_file=schema_file)
+    async def get(self, input_dict: dict):
+        """
+        ---
+        tags: [{{ package_name }}]
+        summary: export xlsx file from {{ sql_name }} api
+        """
+        result = await {{ sql_name }}.run(input_dict)
+        file_name = self.request.headers.get('export_xlsx_file_name', "export")
+        header = self.request.headers.get('export_xlsx_header', None)
+        if header is None and export_xlsx not in ("True", ""):
+            header = export_xlsx
+        await export_xlsx_file(self, result.data, file_name, header)

@@ -11,7 +11,6 @@ from easy_api.web import Handler
 package_name = "{{ package_name }}"
 sql_name = "{{ sql_name }}"
 export_xlsx = "{{ export_xlsx }}"
-export_xlsx_type = "{{ type(export_xlsx).__name__ }}"
 file_dir = os.path.dirname(os.path.abspath(__file__))
 schema_file = os.path.join(file_dir, "schema/{{ sql_name }}.json")
 
@@ -32,21 +31,5 @@ class {{ sql_name.title().replace('_', '') }}Handler(Handler, ABC):
 
 
 {% if export_xlsx %}
-@api('/{{ sql_name }}.xlsx')
-class {{ sql_name.title().replace('_', '') }}Handler(Handler, ABC):
-
-    @authorize("{{ package_name }}", "{{ sql_name }}")
-    @request_schema("input_dict", schema_file=schema_file)
-    async def get(self, input_dict: dict):
-        """
-        ---
-        tags: [{{ package_name }}]
-        summary: export xlsx file from {{ sql_name }} api
-        """
-        result = await {{ sql_name }}.run(input_dict)
-        file_name = self.request.headers.get('export_xlsx_file_name', "export")
-        header = self.request.headers.get('export_xlsx_header', None)
-        if header is None and export_xlsx_type == "str":
-            header = export_xlsx
-        await export_xlsx_file(self, result.data, file_name, header)
+{% include "export_xlsx.jinja" %}
 {% endif %}

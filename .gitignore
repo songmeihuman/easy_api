@@ -157,5 +157,6 @@ cython_debug/
 
 # custom
 /sqlite.db
+/sqlite.test.db
 /swagger.json
 /config.yaml
